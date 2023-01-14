@@ -32,3 +32,29 @@ func InsertAlbum(album *e.Album) error {
 	albums = append(albums, *album)
 	return nil
 }
+
+func DeleteAlbum(albumID int) error {
+	for idx, album := range albums {
+		if album.ID == int64(albumID) {
+			albums[idx] = albums[len(albums)-1]
+			albums = albums[:len(albums)-1]
+			return nil
+		}
+	}
+	return errors.New("no album")
+}
+
+func UpdateAlbum(renewAlbum *e.Album) error {
+	for idx, album := range albums {
+		if album.ID == renewAlbum.ID {
+			albums[idx] = e.Album{
+				ID:     renewAlbum.ID,
+				Title:  renewAlbum.Title,
+				Artist: renewAlbum.Artist,
+				Price:  renewAlbum.Price,
+			}
+			return nil
+		}
+	}
+	return nil
+}

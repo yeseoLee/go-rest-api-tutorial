@@ -58,3 +58,45 @@ func PostAlbum(c *gin.Context) {
 
 	c.IndentedJSON(http.StatusCreated, newAlbum)
 }
+
+func PutAlbum(c *gin.Context) {
+	var renewAlbum entity.Album
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "please check id value"})
+		return
+	}
+
+	if err = c.BindJSON(&renewAlbum); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "please check request body"})
+		return
+	}
+	renewAlbum.ID = int64(id)
+
+	// Update album to DB
+	if err := model.UpdateAlbum(&renewAlbum); err != nil {
+		fmt.Println(err)
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "album not found"})
+		return
+	}
+
+	c.IndentedJSON(http.StatusCreated, renewAlbum)
+}
+
+func DeleteAlbum(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "please check id value"})
+		return
+	}
+
+	// Delete album from DB
+	err = model.DeleteAlbum(id)
+	if err != nil {
+		fmt.Println(err)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, gin.H{"message": "delete album complete"})
+}
