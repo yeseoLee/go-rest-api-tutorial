@@ -1,60 +1,137 @@
 package model
 
 import (
+	"database/sql"
 	"errors"
+	"go-rest-api/db"
 	e "go-rest-api/entity"
 )
 
-var albums = []e.Album{
-	{ID: 1, Title: "Blue Train", Artist: "John Coltrane", Price: 56.99},
-	{ID: 2, Title: "Jeru", Artist: "Gerry Mulligan", Price: 17.99},
-	{ID: 3, Title: "Sarah Vaughan and Clifford Brown", Artist: "Sarah Vaughan", Price: 39.99},
-}
+func GetAlbumById(albumID int) (album e.Album, err error) {
+	const query = `SELECT * FROM albums WHERE Id = ?`
+	err = db.GetInstance().DBPool().QueryRow(query, albumID).Scan(&album.ID, &album.Title, &album.Artist, &album.Price)
 
-func GetAlbumById(albumID int) (e.Album, error) {
-	for _, album := range albums {
-		if album.ID == int64(albumID) {
-			return album, nil
-		}
+	if err == sql.ErrNoRows {
+		err = errors.New("album is not found")
 	}
-	return e.Album{}, errors.New("no album")
+	return
 }
 
-func GetAllAlbums() ([]e.Album, error) {
-	return albums, nil
+func GetAllAlbums() (albums []e.Album, err error) {
+	var album e.Album
+
+	rows, err := db.GetInstance().DBPool().Query(`SELECT * FROM albums order by id desc`)
+	// rows, err := db.GetInstance().DBPool().Query(`SELECT * FROM albums order by id desc offset $1 limit $2`, pagination.Offset, pagination.ItemInPage) // param -> pagination e.ResponsePagination
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err = rows.Scan(&album.ID, &album.Title, &album.Artist, &album.Price)
+		if err != nil {
+			return
+		}
+		albums = append(albums, album)
+	}
+
+	err = rows.Err()
+	return
 }
 
-func CountAlbums() (int, error) {
-	return len(albums), nil
+func CountAlbums() (countAlbums int, err error) {
+	err = db.GetInstance().DBPool().QueryRow("SELECT count(*) FROM albums").Scan(&countAlbums)
+
+	if err == sql.ErrNoRows {
+		countAlbums = 0
+		err = nil
+	}
+	return
 }
 
 func InsertAlbum(album *e.Album) error {
-	albums = append(albums, *album)
+	const query = `INSERT INTO albums (title, artist, price) VALUES (?, ?, ?)`
+	tx, err := db.GetInstance().DBPool().Begin()
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(query, album.Title, album.Artist, album.Price)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
 	return nil
+
+}
+
+func UpdateAlbum(album *e.Album) error {
+
+	const query = `UPDATE albums SET title = ?, artist = ?, price = ? WHERE id = ?`
+	tx, err := db.GetInstance().DBPool().Begin()
+	if err != nil {
+		return err
+	}
+
+	res, err := tx.Exec(query, album.Title, album.Artist, album.Price, album.ID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if rowsAffected == 0 {
+		tx.Rollback()
+		return errors.New("data is not found")
+	}
+
+	if rowsAffected > 1 {
+		tx.Rollback()
+		return errors.New("Strange behaviour. Total affected is : " + string(rowsAffected))
+	}
+
+	tx.Commit()
+
+	return nil
+
 }
 
 func DeleteAlbum(albumID int) error {
-	for idx, album := range albums {
-		if album.ID == int64(albumID) {
-			albums[idx] = albums[len(albums)-1]
-			albums = albums[:len(albums)-1]
-			return nil
-		}
+	const query = `DELETE FROM albums WHERE id = ?`
+	tx, err := db.GetInstance().DBPool().Begin()
+	if err != nil {
+		return err
 	}
-	return errors.New("no album")
-}
 
-func UpdateAlbum(renewAlbum *e.Album) error {
-	for idx, album := range albums {
-		if album.ID == renewAlbum.ID {
-			albums[idx] = e.Album{
-				ID:     renewAlbum.ID,
-				Title:  renewAlbum.Title,
-				Artist: renewAlbum.Artist,
-				Price:  renewAlbum.Price,
-			}
-			return nil
-		}
+	res, err := tx.Exec(query, albumID)
+	if err != nil {
+		tx.Rollback()
+		return err
 	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if rowsAffected == 0 {
+		tx.Rollback()
+		return errors.New("data is not found")
+	}
+
+	if rowsAffected > 1 {
+		return errors.New("Strange behaviour. Total affected : " + string(rowsAffected))
+	}
+
+	tx.Commit()
 	return nil
+
 }
