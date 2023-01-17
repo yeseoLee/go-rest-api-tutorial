@@ -27,6 +27,7 @@ func main() {
 
 	// gin route and run
 	r := gin.Default()
+	r.LoadHTMLGlob("templates/*")
 	router.InitRoutes(r)
 
 	// swagger 적용
