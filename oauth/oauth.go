@@ -12,10 +12,10 @@ var OauthConf *oauth2.Config
 
 const OauthGoogleUrlAPI = "https://www.googleapis.com/oauth2/v2/userinfo?access_token="
 
-func oauthInit() {
+func init() {
 	OauthConf = &oauth2.Config{
-		ClientID:     "237352887062-e47geq5e4haje4q7a0d6ra9e9ul13lle.apps.googleusercontent.com",
-		ClientSecret: "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",
+		ClientID:     "ClientID",
+		ClientSecret: "ClientSecret",
 		RedirectURL:  "http://localhost:9300/login/callback",
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.email",
