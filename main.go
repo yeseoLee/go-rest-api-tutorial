@@ -2,17 +2,17 @@ package main
 
 import (
 	"fmt"
-	v1 "go-rest-api/api/v1"
 	"go-rest-api/db"
-	"go-rest-api/docs"
 	"go-rest-api/router"
 
 	"github.com/gin-gonic/gin"
-
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// @title Example API
+// @description 검색창에 버전을 입력하면 해당 버전의 api가 노출됩니다.
+// @description 예시) v1.json
+// @description 현재 사용가능한 버전 : ###versionList###
+// @description 버전 없이 호출 시 v1 함수가 호출 됩니다.
 func main() {
 
 	// Set DB
@@ -29,15 +29,5 @@ func main() {
 	r := gin.Default()
 	r.LoadHTMLGlob("templates/*")
 	router.InitRoutes(r)
-
-	// swagger 적용
-	docs.SwaggerInfo.Title = "Swagger Example API"
-	// 127.0.0.1:8080/docs/index.html
-	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	v1Group := r.Group("/api/v1")
-	{
-		v1Group.GET("/hello/:name", v1.HelloHandler)
-	}
 	r.Run("localhost:8080")
 }
