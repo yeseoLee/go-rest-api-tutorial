@@ -1,0 +1,12 @@
+{
+    "service":{
+        "port": "8080",
+        "root": "/member/"
+    },
+    "mysql":{
+        "addr": "127.0.0.1",
+        "port": 3306,
+        "id": "root",
+        "pw": "1234"
+    }
+}
