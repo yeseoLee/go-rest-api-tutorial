@@ -1,6 +1,7 @@
 package main
 
 import (
+	"board/config"
 	"board/datasource"
 	"board/question"
 
@@ -12,7 +13,12 @@ func main() {
 	// datasource
 	ds := datasource.
 		MySQLInstance().
-		MySQLConnectionInfo("ip", 1234, "id", "pw", "dbName").
+		MySQLConnectionInfo(
+			config.GetInstance().Mysql.Host,
+			config.GetInstance().Mysql.Port,
+			config.GetInstance().Mysql.DatabaseName,
+			config.GetInstance().Mysql.User,
+			config.GetInstance().Mysql.Password).
 		MySQLConnect()
 
 	////// Echo Web Framework //////
@@ -36,5 +42,5 @@ func registRoutes(ds datasource.DataSource, e *echo.Echo) {
 }
 
 func runServer(e *echo.Echo) {
-	e.Logger.Fatal(e.Start(":1323"))
+	e.Logger.Fatal(e.Start(config.GetInstance().Service.Port))
 }
