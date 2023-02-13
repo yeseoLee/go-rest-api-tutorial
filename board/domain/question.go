@@ -1,11 +1,19 @@
 package domain
 
+// input(DTO)
+
+// output(VO)
+
+// DBStruct(DAO)
 type Question struct {
-	Title     string `json:"title"`
-	Body      string `json:"body"`
-	UserName  string `json:"userName"`
-	CreatedAt string `json:"createdAt"`
-	UpdatedAt string `json:"updatedAt"`
+	Id         int64    `json:"id"`
+	Title      string   `json:"title"`
+	Content    string   `json:"body"`
+	Writer     string   `json:"writer"`
+	WriterId   string   `json:"writerId"`
+	Images     []string `json:"images"`
+	CreateTime string   `json:"createTime"`
+	UpdateTime string   `json:"updateTime"`
 }
 
 type QuestionRepository interface {

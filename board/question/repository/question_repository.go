@@ -2,7 +2,7 @@ package question
 
 import (
 	"database/sql"
-	"fmt"
+	"time"
 
 	"board/datasource"
 	model "board/domain"
@@ -21,39 +21,32 @@ type QuestionRepository struct {
 }
 
 func (r *QuestionRepository) GetByID(id int64) (*model.Question, error) {
-	fmt.Println(">> ", r.DBEngine)
-	return &model.Question{
-		Title:    "MySQL 사용법",
-		Body:     "MySQL은 쉽게 사용 할 수 있습니다.\n정말로",
-		UserName: "yundream",
-	}, nil
+	//r.DBEngine
+	return &model.Question{}, nil
 }
 
 func (r *QuestionRepository) Fetch(offset, limit int) ([]*model.Question, error) {
-	fmt.Println(">> ", r.DBEngine)
-	return []*model.Question{
-		{
-			Title:    "MySQL 사용법",
-			Body:     "MySQL은 쉽게 사용 할 수 있습니다.\n정말로",
-			UserName: "yundream",
-		},
-		{
-			Title:    "GoLang의 미래",
-			Body:     "GoLang의 미래는 밝아보입니다....",
-			UserName: "yundream",
-		},
-	}, nil
+	return []*model.Question{}, nil
 }
 
 func (r *QuestionRepository) Create(question *model.Question) (*model.Question, error) {
+	question.UpdateTime = time.Now().Format("2006-01-02 15:04:05")
+	result, err := r.DBEngine.Exec("INSERT INTO `tbQuestion`(`Title`,`Content`,`Writer`,`WriterId`,`Images`,`CreateTime`) VALUES (?, ?, ?, ?, ?, ?)",
+		question.Title, question.Content, question.Writer, question.WriterId, question.Images, question.CreateTime)
+	if err != nil {
+		return question, err
+	}
+	question.Id, err = result.LastInsertId()
+	if err != nil {
+		return question, err
+	}
 	return question, nil
 }
 
 func (r *QuestionRepository) Update(id int64, question *model.Question) (*model.Question, error) {
-	return &model.Question{Title: "Update"}, nil
+	return &model.Question{}, nil
 }
 
 func (r *QuestionRepository) Delete(id int64) error {
-	fmt.Println("삭제")
 	return nil
 }
