@@ -20,7 +20,7 @@ func MySQLInstance() mysql {
 	return mysqlInstance
 }
 
-func (m mysql) MySQLConnectionInfo(ip string, port int, id string, pw string, dbName string) mysql {
+func (m mysql) MySQLConnectionInfo(ip string, port int, dbName string, id string, pw string) mysql {
 	m.driverName = DRIVER_NAME_MYSQL
 	m.dataSourceName = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", id, pw, ip, port, dbName)
 	return m
