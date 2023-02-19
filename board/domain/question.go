@@ -1,33 +1,67 @@
 package domain
 
-// input(DTO)
+import "time"
 
-// output(VO)
-
-// DBStruct(DAO)
+// Entity
 type Question struct {
-	Id         int64    `json:"id"`
-	Title      string   `json:"title"`
-	Content    string   `json:"body"`
-	Writer     string   `json:"writer"`
-	WriterId   string   `json:"writerId"`
-	Images     []string `json:"images"`
-	CreateTime string   `json:"createTime"`
-	UpdateTime string   `json:"updateTime"`
+	Id        uint      `json:"id"`
+	WriterId  string    `json:"writerId"`
+	Title     string    `json:"title"`
+	Content   string    `json:"body"`
+	Tags      []string  `json:"tags"`
+	Images    []string  `json:"images"`
+	IsAccept  bool      `json:"IsAccept"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	DeletedAt time.Time `json:"deleteddAt"`
+	// ---------
+	// 좋아요 수
+	// 조회 수
+}
+
+// DTO
+type QuestionInput struct {
+	WriterId string   `json:"writerId"`
+	Title    string   `json:"title"`
+	Content  string   `json:"body"`
+	Tags     []string `json:"tags"`
+	Images   []string `json:"images"`
+}
+
+type QuestionOutput struct {
+	Id        uint      `json:"id"`
+	WriterId  string    `json:"writer"`
+	Title     string    `json:"title"`
+	Content   string    `json:"body"`
+	Tags      []string  `json:"tags"`
+	Images    []string  `json:"images"`
+	IsAccept  bool      `json:"IsAccept"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+type QuestionsearchOption struct {
+	Title    string `json:"title"`
+	Content  string `json:"body"`
+	WriterId string `json:"writerId"`
+}
+
+type QuestionOrderOption struct {
 }
 
 type QuestionRepository interface {
-	GetByID(id int64) (*Question, error)
-	Fetch(offset, limit int) ([]*Question, error)
-	Create(question *Question) (*Question, error)
-	Update(id int64, question *Question) (*Question, error)
-	Delete(id int64) error
+	FindById(id uint) (*Question, error)
+	FindAll(limit, offset int) ([]*Question, error)
+	//FindAllByTags(tags []string) ([]*Question, error)
+	Create(questionInput *QuestionInput) (*Question, error)
+	Update(id uint, questionUpdate map[string]interface{}) (*Question, error)
+	Delete(id uint) error
 }
 
 type QuestionUseCase interface {
-	GetByID(id int64) (res *Question, err error)
-	Fetch(offset, limit int) (res []*Question, err error)
-	Create(question *Question) (*Question, error)
-	Update(id int64, question *Question) (*Question, error)
-	Delete(id int64) error
+	Get(id uint) (*QuestionOutput, error)
+	GetAll(limit, offset int) ([]*QuestionOutput, error)
+	Create(questionInput *QuestionInput) (*QuestionOutput, error)
+	Edit(WriterId string, id uint, questionEdit map[string]interface{}) (*QuestionOutput, error)
+	Accept(WriterId string, id uint) error
+	Delete(WriterId string, id uint) error
 }
