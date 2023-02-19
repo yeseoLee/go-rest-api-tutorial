@@ -9,7 +9,7 @@ datasource Pattern [O]
 답변[X]
 덧글[X] 
 검색[X]
-좋아요/싫어요[X]
+좋/싫[X]
 신고[X]
 
 ### 기술 구현
@@ -17,6 +17,7 @@ handler 구현 [X]
 DB 구현 [X]
 MiddleWare 구현 - 캐싱,로깅 [X]
 Config 구현 [O]
+로그[X]
 
 
 ### 리팩토링
