@@ -12,22 +12,62 @@ func NewQuestionUseCase(u domain.QuestionRepository) domain.QuestionUseCase {
 	}
 }
 
-func (u *questionUsecase) GetByID(id int64) (*domain.Question, error) {
-	res, err := u.questionRepo.GetByID(id)
-	return res, err
+func (u *questionUsecase) Get(id uint) (*domain.QuestionOutput, error) {
+	q, err := u.questionRepo.FindById(id)
+	if err != nil {
+		return nil, err
+	}
+	qo := u.transferOutput(q)
+	return qo, nil
 }
-func (u *questionUsecase) Fetch(offset, limit int) ([]*domain.Question, error) {
-	return u.questionRepo.Fetch(offset, limit)
+func (u *questionUsecase) GetAll(limit, offset int) ([]*domain.QuestionOutput, error) {
+	qList, err := u.questionRepo.FindAll(limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	var qoList []*domain.QuestionOutput
+	for _, v := range qList {
+		qo := u.transferOutput(v)
+		qoList = append(qoList, qo)
+	}
+	return qoList, nil
 }
 
-func (u *questionUsecase) Create(question *domain.Question) (*domain.Question, error) {
-	return u.questionRepo.Create(question)
+func (u *questionUsecase) Create(questionInput *domain.QuestionInput) (*domain.QuestionOutput, error) {
+	q, err := u.questionRepo.Create(questionInput)
+	if err != nil {
+		return nil, err
+	}
+	qo := u.transferOutput(q)
+	return qo, nil
 }
 
-func (u *questionUsecase) Update(id int64, question *domain.Question) (*domain.Question, error) {
-	return u.questionRepo.Update(id, question)
+func (u *questionUsecase) Edit(WriterId string, id uint, questionEdit map[string]interface{}) (*domain.QuestionOutput, error) {
+	q, err := u.questionRepo.Update(id, questionEdit)
+	if err != nil {
+		return nil, err
+	}
+	qo := u.transferOutput(q)
+	return qo, nil
 }
 
-func (u *questionUsecase) Delete(id int64) error {
+func (u *questionUsecase) Accept(WriterId string, id uint) error {
+	// TODO
+	_, err := u.questionRepo.Update(id, map[string]interface{}{"IsAccept": true})
+	return err
+}
+
+func (u *questionUsecase) Delete(WriterId string, id uint) error {
 	return u.questionRepo.Delete(id)
+}
+
+func (u *questionUsecase) transferOutput(question *domain.Question) *domain.QuestionOutput {
+	qo := &domain.QuestionOutput{}
+	qo.Id = question.Id
+	qo.Title = question.Title
+	qo.Content = question.Content
+	qo.WriterId = question.WriterId
+	qo.Images = question.Images
+	qo.UpdatedAt = question.UpdatedAt
+	return qo
 }
